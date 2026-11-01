@@ -50,3 +50,16 @@ section{display:none;position:absolute;inset:calc(98px + env(safe-area-inset-top
 @keyframes hero-idle{50%{transform:translateY(-3px)}}
 .map-world-label{letter-spacing:2px;background:linear-gradient(90deg,#203d2e,#426045,#203d2e);border:1px solid #d9c391;border-radius:7px;padding:7px 13px;box-shadow:0 4px 8px #172e2580}
 @media(prefers-reduced-motion:reduce){.hero-body,.resource-marker.collectable .resource-token{animation:none}}
+
+/* v0.0.8 — real-time WebGL village */
+#village3d{position:absolute;inset:0;z-index:2;overflow:hidden;touch-action:pan-y;background:linear-gradient(#8ebdd3,#bdd4b2 35%,#668c56)}
+#village3d canvas{width:100%;height:100%;display:block}
+.village:has(#village3d canvas) .road,.village:has(#village3d canvas) .road2{display:none}
+.village:has(#village3d canvas)::after,.village:has(#village3d canvas)::before{display:none}
+.village:has(#village3d canvas) .building{background:#172c25d9;border:1px solid #e6c783;color:#fff1c5;box-shadow:0 3px 12px #0009;min-height:30px;min-width:60px;font-size:0;padding:3px 5px;z-index:4}
+.village:has(#village3d canvas) .building::before{display:none}
+.village:has(#village3d canvas) .building span{background:none;box-shadow:none;color:#fff3cf;font-size:10px}
+.village:has(#village3d canvas) .building.locked{opacity:.7;filter:none;border-style:dashed}
+.village:has(#village3d canvas) .b1{left:43%;top:18%}.village:has(#village3d canvas) .b2{left:12%;top:33%}.village:has(#village3d canvas) .b3{right:9%;top:30%}.village:has(#village3d canvas) .b4{left:13%;bottom:20%}.village:has(#village3d canvas) .b5{right:10%;bottom:20%}.village:has(#village3d canvas) .b6{left:43%;bottom:9%}
+.village{height:75%}.village-sheet{max-height:37%}
+#village3d .scene-fallback{padding:90px 22px 10px;text-align:center;color:#152a1c;font-weight:700}
