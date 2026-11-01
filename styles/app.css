@@ -71,3 +71,8 @@ section{display:none;position:absolute;inset:calc(98px + env(safe-area-inset-top
 body:not(.gps-ready) #map,body:not(.gps-ready) #world3d{visibility:hidden}
 #world::before{content:'📍 Localizando al aventurero…';position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:2;text-align:center;max-width:80%;font-weight:700;color:#f5e9c9;background:rgba(15,38,31,.85);padding:16px;border-radius:16px;pointer-events:none}
 body.gps-ready #world::before{display:none}
+
+/* v0.0.15: when public Overpass services time out, show the actual OSM street tiles instead of a roadless 3D landscape. */
+body.roads-fallback #world3d{visibility:hidden!important;pointer-events:none!important}
+body.roads-fallback #map{visibility:visible!important}
+body.roads-fallback .world-3d-status{background:#6b4527e6}
