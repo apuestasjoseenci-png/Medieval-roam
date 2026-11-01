@@ -73,10 +73,13 @@ body:not(.gps-ready) #map,body:not(.gps-ready) #world3d{visibility:hidden}
 body.gps-ready #world::before{display:none}
 
 /* v0.0.15: when public Overpass services time out, show the actual OSM street tiles instead of a roadless 3D landscape. */
-body.roads-fallback #world3d{visibility:hidden!important;pointer-events:none!important}
-body.roads-fallback #map{visibility:visible!important}
+
+
 body.roads-fallback .world-3d-status{background:#6b4527e6}
 
 /* 0.0.16: always retain 3D scene when OSM geometry is unavailable */
 .roads-fallback #world3d{visibility:visible!important;pointer-events:auto!important}
 .roads-fallback #map{visibility:hidden!important}
+
+/* Versión visible en la cabecera, sin tapar el diagnóstico GPS */
+.version-indicator{display:inline-block;margin-left:7px;padding:2px 6px;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:rgba(0,0,0,.24);color:#f3e8c7;font-size:10px;font-weight:700;white-space:nowrap;vertical-align:middle}
