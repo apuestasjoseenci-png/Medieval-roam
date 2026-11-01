@@ -32,6 +32,31 @@ function clear(group){while(group.children.length){let o=group.children[0];group
 // when Overpass geometry fails; do not switch the whole view back to Leaflet.
 const osmTiles=new T.Group();scene.add(osmTiles);
 let tileEpoch=0;const osmLoader=new T.TextureLoader();osmLoader.setCrossOrigin('anonymous');
+// Convert the available OSM raster tiles to a parchment/forest palette locally.
+// This keeps actual street geometry visible even when Overpass is unavailable.
+function medievalTexture(source){
+ try{
+  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0,256,256);
+  const frame=ctx.getImageData(0,0,256,256),a=frame.data;
+  for(let i=0;i<a.length;i+=4){
+   const r=a[i],g=a[i+1],b=a[i+2],bright=(r+g+b)/3;
+   const green=g>r*1.07&&g>b*.96;
+   const water=b>r*1.10&&b>g*1.02;
+   const neutral=Math.max(r,g,b)-Math.min(r,g,b)<31;
+   let R,G,B;
+   if(water){R=92;G=143;B=150;}
+   else if(green){let v=Math.max(0,Math.min(1,(g-75)/175));R=92+v*39;G=133+v*45;B=73+v*26;}
+   else if(neutral&&bright>175){R=190;G=165;B=122;}
+   else if(bright>205){R=203;G=183;B=142;}
+   else if(bright>120){R=155;G=148;B=115;}
+   else {R=r*.72+44;G=g*.68+55;B=b*.60+42;}
+   a[i]=R;a[i+1]=G;a[i+2]=B;
+  }
+  ctx.putImageData(frame,0,0);const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
+ }catch(e){return null}
+}
+
 function tileXY(lat,lon,z){let n=2**z,rad=Math.max(-85,Math.min(85,lat))*Math.PI/180;return [(lon+180)/360*n,(1-Math.asinh(Math.tan(rad))/Math.PI)/2*n]}
 function tileLatLon(x,y,z){let n=2**z;return {lon:x/n*360-180,lat:Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI}}
 function showOSMTiles(lat,lon){
@@ -41,10 +66,10 @@ function showOSMTiles(lat,lon){
   let nw=tileLatLon(ix,iy,z),se=tileLatLon(ix+1,iy+1,z);
   let a=xyz(nw.lat,nw.lon),b=xyz(se.lat,se.lon),width=b[0]-a[0],depth=b[1]-a[1];
   let geometry=new T.PlaneGeometry(width,depth);
-  let material=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.86,depthWrite:false,side:T.DoubleSide});
+  let material=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide});
   let mesh=new T.Mesh(geometry,material);mesh.rotation.x=-Math.PI/2;mesh.position.set((a[0]+b[0])/2,.012,(a[1]+b[1])/2);mesh.renderOrder=1;osmTiles.add(mesh);
   osmLoader.load(`https://tile.openstreetmap.org/${z}/${ix}/${iy}.png`,texture=>{
-   if(epoch!==tileEpoch){texture.dispose();return}texture.colorSpace=T.SRGBColorSpace;material.map=texture;material.needsUpdate=true;
+   if(epoch!==tileEpoch){texture.dispose();return}const stylized=medievalTexture(texture.image);if(stylized){texture.dispose();material.map=stylized;}else{texture.colorSpace=T.SRGBColorSpace;material.map=texture;}material.needsUpdate=true;
   },undefined,()=>{});
  }
 }
@@ -82,6 +107,6 @@ async function loadRoads(lat,lon){
    setRoads(data.elements);return;
   }catch(err){lastError=err.name==='AbortError'?'Tiempo de espera agotado':err.message||'Error de red';}
  }
- if(generation===roadGeneration&&!signal.aborted){clear(roads);document.body.classList.remove('roads-fallback');roadStatus.textContent='Caminos 3D no disponibles ('+lastError+'). Calles reales visibles sobre el terreno 3D · © OpenStreetMap';}
+ if(generation===roadGeneration&&!signal.aborted){clear(roads);document.body.classList.remove('roads-fallback');roadStatus.textContent='Caminos vectoriales no disponibles ('+lastError+'). Calles reales con estilo medieval · © OpenStreetMap';}
 }
 window.MRRetryRoads=()=>{if(center)loadRoads(center.lat,center.lon)};let lastNodesSignature='',lastNodesAt=null;function updateNodes(nodes){let signature=nodes.map(n=>n.key).join('|');if(signature===lastNodesSignature&&lastNodesAt&&Math.hypot(hero.position.x-lastNodesAt[0],hero.position.z-lastNodesAt[1])<12)return;lastNodesSignature=signature;lastNodesAt=[hero.position.x,hero.position.z];clear(props);if(!center)return;for(let n of nodes){let [x,z]=xyz(n.lat,n.lon);if(Math.abs(x)>360||Math.abs(z)>360)continue;if(n.type==='wood')tree(props,x,z,1.3);else if(n.type==='stone')for(let i=0;i<3;i++)boulder(props,x+(i-1)*.8,z+(i%2)*.7,.85);else if(n.type==='ore'){boulder(props,x,z,1.35,ore);create(props,new T.OctahedronGeometry(.48),mat(0x79d4c5),x,1.3,z)}else{create(props,cyl(.12,.16,1.2),trunk,x,.6,z);create(props,new T.SphereGeometry(1,7,6),treeMat[1],x,1.6,z);for(let i=0;i<5;i++)create(props,new T.SphereGeometry(.22,6,5),food,x+Math.sin(i*2.5)*.72,1.6+Math.cos(i*3)*.4,z+Math.cos(i*2.5)*.65)}let ring=create(props,new T.RingGeometry(1.5,1.7,20),mat(n.dist<=30?0xffdc6e:0xece7c0),x,.07,z);ring.rotation.x=-Math.PI/2}}create(hero,cyl(.5,.65,1.6),avatarMat,0,1.05,0);create(hero,new T.SphereGeometry(.43,12,9),mat(0xf0cba2),0,2.13,0);let hat=create(hero,new T.ConeGeometry(.63,.95,7),cape,0,2.75,0);hat.rotation.z=.12;let cloak=create(hero,new T.ConeGeometry(.87,1.8,7),cape,0,.9,.35);cloak.rotation.x=.13;let halo=create(hero,new T.RingGeometry(3.8,4.1,48),mat(0xf9e8a7),0,.05,0);halo.rotation.x=-Math.PI/2;let zoom=1,angle=0,drag=null,gestureDistance=null,gestureZoom=1;const pointers=new Map();host.style.touchAction='none';host.addEventListener('pointerdown',e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});host.setPointerCapture(e.pointerId);if(pointers.size===1)drag={x:e.clientX,angle};if(pointers.size===2){const a=[...pointers.values()];gestureDistance=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);gestureZoom=zoom;drag=null}});host.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2&&gestureDistance){const a=[...pointers.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);zoom=Math.max(.45,Math.min(2.2,gestureZoom*gestureDistance/Math.max(20,d)))}else if(drag)angle=drag.angle+(e.clientX-drag.x)*.006});const pointerEnd=e=>{pointers.delete(e.pointerId);drag=null;if(pointers.size<2)gestureDistance=null};host.addEventListener('pointerup',pointerEnd);host.addEventListener('pointercancel',pointerEnd);host.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.6,Math.min(2,zoom+Math.sign(e.deltaY)*.1))},{passive:false});window.MRWorld3D={update(p,nodes){if(!p)return;let newCenter=!center||Math.hypot((p.lat-center.lat)*111320,(p.lng-center.lon)*111320*Math.cos(p.lat*Math.PI/180))>180;if(newCenter){center={lat:p.lat,lon:p.lng};lastNodesSignature='';scenery(p.lat,p.lng);showOSMTiles(p.lat,p.lng);roadCenter=center;loadRoads(p.lat,p.lng)}let [x,z]=xyz(p.lat,p.lng);hero.position.set(x,0,z);updateNodes(nodes||[])},zoom(delta){zoom=Math.max(.6,Math.min(2,zoom+delta))},reset(){angle=0;zoom=1}};let ro=new ResizeObserver(()=>{let w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)});ro.observe(host);let last=0,camReady=false;const camTarget=new T.Vector3();function draw(t){requestAnimationFrame(draw);if(t-last<32)return;last=t;if(!host.offsetParent)return;let h=hero.position;const desired=new T.Vector3(h.x+Math.sin(angle)*105*zoom,100*zoom,h.z+Math.cos(angle)*105*zoom);if(!camReady){camera.position.copy(desired);camTarget.set(h.x,0,h.z);camReady=true}else{camera.position.lerp(desired,.16);camTarget.lerp(new T.Vector3(h.x,0,h.z),.2)}camera.lookAt(camTarget);renderer.render(scene,camera)}requestAnimationFrame(draw);})();
