@@ -47,19 +47,16 @@ function medievalTexture(source){
    const r=a[i],g=a[i+1],b=a[i+2];
    const mx=Math.max(r,g,b),mn=Math.min(r,g,b),lum=(r+g+b)/3;
    let R,G,B;
-   // OSM water and vegetation retain their own distinct colors.
-   if(b>g*1.035&&b>r*1.075&&b>135){R=88;G=149;B=169;}
-   else if(g>r*1.035&&g>b*.96&&g>125){R=111;G=159;B=92;}
-   // White road interiors: light stone, visibly lighter than land.
-   else if(lum>245&&mx-mn<20){R=251;G=233;B=184;}
-   // Street borders, building edges, thin map linework.
-   else if(lum<155&&mx-mn<34){R=108;G=100;B=83;}
-   // Building footprints: darker, cooler than surrounding plots.
-   else if(lum>=155&&lum<225&&mx-mn<30){R=167;G=160;B=145;}
-   // Land parcels and residential blocks: warm cream, not brown.
-   else if(lum>=225&&mx-mn<34){R=220;G=207;B=170;}
-   else if(lum>205){R=226;G=212;B=177;}
-   else{R=r*.78+27;G=g*.77+30;B=b*.70+35;}
+   // Preserve fine-grained OSM geometry: only apply subtle palette shifts.
+   // Avoid hard thresholding white roads and beige land into the same color.
+   const chroma=mx-mn;
+   if(b>g*1.035&&b>r*1.075&&b>135){R=r*.38+62;G=g*.52+62;B=b*.70+42;}
+   else if(g>r*1.035&&g>b*.96&&g>125){R=r*.48+48;G=g*.75+35;B=b*.47+37;}
+   else if(lum>239&&chroma<22){R=r*.70+67;G=g*.66+61;B=b*.53+44;}
+   else if(lum<165&&chroma<35){R=r*.70+31;G=g*.67+28;B=b*.58+27;}
+   else if(lum<225&&chroma<35){R=r*.81+19;G=g*.77+20;B=b*.71+18;}
+   else{R=r*.88+20;G=g*.85+21;B=b*.79+18;}
+   // Keep source contrast, including narrow streets and building outlines.
    a[i]=R;a[i+1]=G;a[i+2]=B;
   }
   ctx.putImageData(frame,0,0);
