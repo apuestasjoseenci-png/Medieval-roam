@@ -32,3 +32,21 @@ section{display:none;position:absolute;inset:calc(98px + env(safe-area-inset-top
 .map-world-label{position:absolute;z-index:392;left:50%;top:66px;transform:translateX(-50%);pointer-events:none;white-space:nowrap;font:700 10px Georgia,serif;letter-spacing:1.4px;color:#f9e6b4;text-shadow:0 2px 5px #14291c,0 0 10px #14291c;background:#244132b8;border:1px solid #dfc78c77;border-radius:30px;padding:6px 12px}
 .resource-marker{border:0;background:none}.resource-token{height:36px;width:36px;display:grid;place-items:center;font-size:22px;background:linear-gradient(140deg,#f7e5b9,#b89c63);border:2px solid #654d2e;border-radius:13px 13px 13px 4px;box-shadow:0 3px 0 #4e3e27,0 5px 12px #26382599;transform:rotate(-5deg)}.resource-marker.collectable .resource-token{border-color:#fff2ad;box-shadow:0 0 0 4px #e8d07377,0 3px 12px #263825aa;animation:nodepulse 1.8s ease-in-out infinite}@keyframes nodepulse{50%{transform:translateY(-3px) rotate(3deg)}}
 .hero-body{background:linear-gradient(140deg,#e0c18c,#50704f);border:3px solid #fce8b4;box-shadow:0 0 0 4px #304e3670,0 4px 10px #152a2aaa}.gps-card{background:#1d3529e8;border-color:#d8c18a77}.map-actions button{background:linear-gradient(150deg,#3e6045,#233b2d);border-color:#e5c98b}.world-sheet{background:linear-gradient(#344e3a,#152b21)}
+
+/* v0.0.7: village diorama and illustrated map markers; progressive 2.5D visual upgrade */
+.village{background:radial-gradient(ellipse at 48% 38%,#a8bd7c 0%,#83a66c 43%,#52764b 100%);isolation:isolate;box-shadow:inset 0 15px 40px #e5dfab4a,inset 0 -25px 50px #203d2e66}
+.village::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;background-image:radial-gradient(ellipse 7px 3px at 12% 18%,#284d2b 50%,transparent 70%),radial-gradient(ellipse 8px 4px at 75% 65%,#2d522b 50%,transparent 70%),radial-gradient(ellipse 6px 3px at 32% 83%,#e4dba0 50%,transparent 70%);background-size:48px 38px,64px 53px,39px 51px}
+.village::after{content:"🌲     🌳       🌲      🌳     🌲";position:absolute;left:0;right:0;bottom:8px;z-index:1;font-size:26px;letter-spacing:11px;opacity:.75;pointer-events:none;white-space:nowrap;overflow:hidden;filter:drop-shadow(2px 5px 1px #274a2d66)}
+.village .road,.village .road2{background:repeating-linear-gradient(95deg,#c6b58d 0 13px,#b9a87e 13px 15px,#d2c19b 15px 31px);border:0;box-shadow:inset 0 4px 0 #e2d0a35c,inset 0 -5px 0 #6e624747,0 0 0 5px #557c4877}
+.village .road{height:47px}.village .road2{width:38px}
+.building{font-size:24px;min-width:76px;min-height:69px;padding:5px 4px 3px;background:linear-gradient(150deg,#e1bd7e 0%,#b98451 70%);border:2px solid #62452e;border-radius:8px 8px 12px 12px;box-shadow:0 7px 0 #695036,3px 11px 3px #263d2b80,0 0 0 3px #e4d49b80;text-shadow:0 1px 0 #fff6;transition:filter .15s,transform .15s}
+.building::before{content:"";position:absolute;left:-6px;right:-6px;top:-15px;height:20px;background:linear-gradient(160deg,#ad5945 0%,#7d3c33 65%,#542e2b);clip-path:polygon(50% 0,100% 77%,96% 100%,4% 100%,0 77%);filter:drop-shadow(1px 3px 1px #48342b77);pointer-events:none}
+.building span{font-size:10px;line-height:1.1;color:#352619;background:#f3dca5e8;border-radius:6px;padding:3px 4px;white-space:nowrap;box-shadow:0 1px 2px #0003}
+.building.selected{outline:3px solid #ffe6a3;outline-offset:4px;filter:brightness(1.12)}
+.building.locked{filter:grayscale(.85) brightness(.75);opacity:.75}
+#map .leaflet-tile-pane{filter:sepia(.34) saturate(.75) hue-rotate(18deg) contrast(.92) brightness(1.06)}
+.resource-token{font-size:23px;width:43px;height:43px;border-radius:50% 50% 46% 46%;background:radial-gradient(circle at 34% 25%,#fff0c8,#c4a873 68%,#917345);border:3px solid #634b2d;box-shadow:0 5px 0 #57432b,0 8px 15px #203726aa}
+.hero-body{width:54px;height:54px;font-size:29px;border-radius:40% 40% 45% 45%;box-shadow:0 0 0 5px #304e3670,0 7px 12px #152a2aaa;animation:hero-idle 2.5s ease-in-out infinite}
+@keyframes hero-idle{50%{transform:translateY(-3px)}}
+.map-world-label{letter-spacing:2px;background:linear-gradient(90deg,#203d2e,#426045,#203d2e);border:1px solid #d9c391;border-radius:7px;padding:7px 13px;box-shadow:0 4px 8px #172e2580}
+@media(prefers-reduced-motion:reduce){.hero-body,.resource-marker.collectable .resource-token{animation:none}}

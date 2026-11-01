@@ -1,18 +1,14 @@
-# Medieval Roam v0.0.6
+# Medieval Roam v0.0.7 — Mejoras gráficas
 
-## Cambios
-- Mapa real con tratamiento cromático medieval, viñeta y marcadores ilustrados de recursos. Sigue siendo cartografía 2D; el mundo 3D aún está pendiente.
-- Nuevo nodo global determinista de **alimentos silvestres 🍎**: 1 unidad por recolección. Requiere GPS y estar a 30 m o menos.
-- Los nodos se generan según coordenadas, por lo que permanecen en el mismo lugar. Cada nodo se recoge una sola vez por partida.
-- Conserva el guardado local de v0.0.5; las partidas nuevas comienzan con recursos y colonos a cero.
-- Conserva los sistemas anteriores de aldea, construcción y producción.
+Esta actualización mantiene la lógica de v0.0.6 y los nodos de 1 unidad.
 
-## Publicación
-Sube `index.html`, `service-worker.js`, `manifest.webmanifest` y las carpetas `styles`, `scripts`, `icons` al nivel raíz del repositorio GitHub Pages, reemplazando archivos coincidentes. Espera la publicación y reinicia la PWA para cargar la nueva versión.
+- Aldea con aspecto de diorama 2.5D: caminos de piedra, vegetación y edificios con tejados, sombras y rótulos.
+- Marcadores de recursos con medallones ilustrados y personaje con animación suave.
+- Mejoras de contraste y tratamiento cromático del mapa real.
+- Compatible con iPhone/PWA y GitHub Pages.
+- Se conserva el guardado anterior: misma clave local.
+- Service worker actualizado para renovar archivos de la PWA.
 
-## Limitaciones
-Los mosaicos cartográficos de OpenStreetMap y Leaflet necesitan conexión; el GPS requiere HTTPS y permisos de ubicación. La partida se guarda solo en el dispositivo. El mapa visual sigue siendo 2D y no reproduce todavía los ocho biomas ni caminos 3D.
+**Limitación:** aún no es terreno 3D real ni hay biomas procedurales renderizados. La cartografía sigue siendo OpenStreetMap y necesita conexión.
 
-## Cambio v0.0.6
-- Todos los nodos GPS (madera, piedra, mineral y alimentos) entregan exactamente **1 unidad** por recolección.
-- Actualización de caché PWA para recibir el cambio.
+Para actualizar: subir todos los archivos de este ZIP a la raíz del repositorio, sustituyendo los existentes.
