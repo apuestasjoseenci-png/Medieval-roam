@@ -35,26 +35,40 @@ let tileEpoch=0;const osmLoader=new T.TextureLoader();osmLoader.setCrossOrigin('
 // Convert the available OSM raster tiles to a parchment/forest palette locally.
 // This keeps actual street geometry visible even when Overpass is unavailable.
 function medievalTexture(source){
+ // Keep streets, building footprints and parks distinct. Avoid collapsing
+ // the whole OSM raster into a uniform brown fill on mobile Safari.
  try{
-  const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
-  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0,128,128);
-  const frame=ctx.getImageData(0,0,128,128),a=frame.data;
+  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  if(!ctx)return null;
+  ctx.drawImage(source,0,0,256,256);
+  const frame=ctx.getImageData(0,0,256,256),a=frame.data;
   for(let i=0;i<a.length;i+=4){
-   const r=a[i],g=a[i+1],b=a[i+2],bright=(r+g+b)/3;
-   const green=g>r*1.07&&g>b*.96;
-   const water=b>r*1.10&&b>g*1.02;
-   const neutral=Math.max(r,g,b)-Math.min(r,g,b)<31;
+   const r=a[i],g=a[i+1],b=a[i+2];
+   const mx=Math.max(r,g,b),mn=Math.min(r,g,b),lum=(r+g+b)/3;
    let R,G,B;
-   if(water){R=92;G=143;B=150;}
-   else if(green){let v=Math.max(0,Math.min(1,(g-75)/175));R=92+v*39;G=133+v*45;B=73+v*26;}
-   else if(neutral&&bright>175){R=190;G=165;B=122;}
-   else if(bright>205){R=203;G=183;B=142;}
-   else if(bright>120){R=155;G=148;B=115;}
-   else {R=r*.72+44;G=g*.68+55;B=b*.60+42;}
+   // OSM water and vegetation retain their own distinct colors.
+   if(b>g*1.035&&b>r*1.075&&b>135){R=88;G=149;B=169;}
+   else if(g>r*1.035&&g>b*.96&&g>125){R=111;G=159;B=92;}
+   // White road interiors: light stone, visibly lighter than land.
+   else if(lum>245&&mx-mn<20){R=251;G=233;B=184;}
+   // Street borders, building edges, thin map linework.
+   else if(lum<155&&mx-mn<34){R=108;G=100;B=83;}
+   // Building footprints: darker, cooler than surrounding plots.
+   else if(lum>=155&&lum<225&&mx-mn<30){R=167;G=160;B=145;}
+   // Land parcels and residential blocks: warm cream, not brown.
+   else if(lum>=225&&mx-mn<34){R=220;G=207;B=170;}
+   else if(lum>205){R=226;G=212;B=177;}
+   else{R=r*.78+27;G=g*.77+30;B=b*.70+35;}
    a[i]=R;a[i+1]=G;a[i+2]=B;
   }
-  ctx.putImageData(frame,0,0);const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;return texture;
- }catch(e){return null}
+  ctx.putImageData(frame,0,0);
+  const texture=new T.CanvasTexture(canvas);
+  texture.colorSpace=T.SRGBColorSpace;
+  texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  texture.needsUpdate=true;
+  return texture;
+ }catch(e){console.warn('Filtro medieval no disponible',e);return null}
 }
 
 function tileXY(lat,lon,z){let n=2**z,rad=Math.max(-85,Math.min(85,lat))*Math.PI/180;return [(lon+180)/360*n,(1-Math.asinh(Math.tan(rad))/Math.PI)/2*n]}
@@ -66,10 +80,10 @@ function showOSMTiles(lat,lon){
   let nw=tileLatLon(ix,iy,z),se=tileLatLon(ix+1,iy+1,z);
   let a=xyz(nw.lat,nw.lon),b=xyz(se.lat,se.lon),width=b[0]-a[0],depth=b[1]-a[1];
   let geometry=new T.PlaneGeometry(width,depth);
-  let material=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide});
+  let material=new T.MeshBasicMaterial({color:0xffffff,transparent:false,depthWrite:true,side:T.DoubleSide});
   let mesh=new T.Mesh(geometry,material);mesh.rotation.x=-Math.PI/2;mesh.position.set((a[0]+b[0])/2,.012,(a[1]+b[1])/2);mesh.renderOrder=1;osmTiles.add(mesh);
   osmLoader.load(`https://tile.openstreetmap.org/${z}/${ix}/${iy}.png`,texture=>{
-   if(epoch!==tileEpoch){texture.dispose();return}const stylized=medievalTexture(texture.image);if(stylized){texture.dispose();material.map=stylized;}else{texture.colorSpace=T.SRGBColorSpace;material.map=texture;roadStatus.textContent='Mapa cargado sin filtro medieval (Safari): comprobando compatibilidad';}material.needsUpdate=true;
+   if(epoch!==tileEpoch){texture.dispose();return}const stylized=medievalTexture(texture.image);if(stylized){texture.dispose();material.map=stylized;}else{texture.colorSpace=T.SRGBColorSpace;material.map=texture;roadStatus.textContent='Mapa real cargado; filtro medieval no disponible en este dispositivo';}material.needsUpdate=true;
   },undefined,()=>{});
  }
 }
@@ -84,10 +98,10 @@ async function loadRoads(lat,lon){
  fetchAbort=new AbortController();
  const signal=fetchAbort.signal;
  const cacheKey=`${Math.round(lat*1000)},${Math.round(lon*1000)}`;
- roadStatus.textContent='Buscando calles y senderos reales…';
+ roadStatus.textContent='Cargando calles y senderos reales…';
  if(roadCache.has(cacheKey)){setRoads(roadCache.get(cacheKey));return;}
  // Bounding box avoids 'around' scans and returns every public highway class in the area.
- const latD=360/111320/360,lonD=360/(111320*Math.max(.2,Math.cos(lat*Math.PI/180)))/360;
+ const latD=360/111320,lonD=360/(111320*Math.max(.2,Math.cos(lat*Math.PI/180)));
  const bbox=[lat-latD,lon-lonD,lat+latD,lon+lonD].map(n=>n.toFixed(6)).join(',');
  const query=`[out:json][timeout:20];way["highway"](${bbox});out geom;`;
  let lastError='';

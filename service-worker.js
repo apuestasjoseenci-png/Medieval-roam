@@ -1,4 +1,4 @@
-const CACHE='medieval-roam-shell-v0021';
+const CACHE='medieval-roam-shell-v0022';
 const ASSETS=['./','./index.html','./styles/app.css','./scripts/app.js','./scripts/scene3d.js','./scripts/world3d.js','./manifest.webmanifest','./icons/icon-180.png','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('medieval-roam-shell-')&&k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
