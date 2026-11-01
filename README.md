@@ -1,3 +1,5 @@
-Medieval Roam v0.0.15 — recuperación de caminos reales.
-Si los servidores Overpass no responden, el mapa cambia automáticamente a las teselas reales de OpenStreetMap, evitando mostrar un mundo 3D sin caminos. Pulsar GPS vuelve a intentar la carga 3D de los caminos. Al recuperarse, vuelve el escenario 3D. Los recursos y la aldea permanecen sin cambios.
-Nota: el modo alternativo es cartografía 2D, no caminos medievales 3D; para estos últimos sigue siendo necesaria una fuente de geometría disponible.
+Medieval Roam v0.0.16
+
+Mapa GPS: las calles reales se muestran como textura OSM sobre el terreno 3D incluso cuando falla Overpass. Los caminos medievales 3D se superponen si llegan datos vectoriales. Conserva GPS, aldea, recolección y respawn de 3 horas.
+
+Limitación: las calles de respaldo son cartografía convencional integrada en el mundo 3D, no caminos medievales modelados. Requiere internet. Datos © OpenStreetMap contributors.

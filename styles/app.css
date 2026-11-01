@@ -76,3 +76,7 @@ body.gps-ready #world::before{display:none}
 body.roads-fallback #world3d{visibility:hidden!important;pointer-events:none!important}
 body.roads-fallback #map{visibility:visible!important}
 body.roads-fallback .world-3d-status{background:#6b4527e6}
+
+/* 0.0.16: always retain 3D scene when OSM geometry is unavailable */
+.roads-fallback #world3d{visibility:visible!important;pointer-events:auto!important}
+.roads-fallback #map{visibility:hidden!important}
