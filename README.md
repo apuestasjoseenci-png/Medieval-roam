@@ -1,15 +1,18 @@
-# Medieval Roam 0.0.4
+# Medieval Roam v0.0.6
 
-Actualización de la PWA para iPhone.
-
-- Nuevo marcador de personaje medieval en el mapa GPS.
-- La cámara sigue al personaje mientras el jugador camina; si desplaza el mapa con el dedo, el seguimiento se pausa. El botón de centrar reanuda el seguimiento.
-- Los recursos iniciales y los colonos iniciales son cero en la partida nueva.
-- Guardado local de la versión 0.0.4 separado del prototipo anterior.
-- Se mantienen los sistemas de aldea, exploración y construcción anteriores.
+## Cambios
+- Mapa real con tratamiento cromático medieval, viñeta y marcadores ilustrados de recursos. Sigue siendo cartografía 2D; el mundo 3D aún está pendiente.
+- Nuevo nodo global determinista de **alimentos silvestres 🍎**: 1 unidad por recolección. Requiere GPS y estar a 30 m o menos.
+- Los nodos se generan según coordenadas, por lo que permanecen en el mismo lugar. Cada nodo se recoge una sola vez por partida.
+- Conserva el guardado local de v0.0.5; las partidas nuevas comienzan con recursos y colonos a cero.
+- Conserva los sistemas anteriores de aldea, construcción y producción.
 
 ## Publicación
-Subir todos los archivos y carpetas al directorio raíz del repositorio de GitHub Pages, sobrescribiendo los existentes. No subir la carpeta contenedora.
+Sube `index.html`, `service-worker.js`, `manifest.webmanifest` y las carpetas `styles`, `scripts`, `icons` al nivel raíz del repositorio GitHub Pages, reemplazando archivos coincidentes. Espera la publicación y reinicia la PWA para cargar la nueva versión.
 
-## Límites
-El mapa todavía usa cartografía 2D y necesita Internet para cargar las teselas. Los recursos y viajeros son prototipos locales, no un mundo compartido ni protegido frente a manipulación. El GPS requiere permiso y HTTPS.
+## Limitaciones
+Los mosaicos cartográficos de OpenStreetMap y Leaflet necesitan conexión; el GPS requiere HTTPS y permisos de ubicación. La partida se guarda solo en el dispositivo. El mapa visual sigue siendo 2D y no reproduce todavía los ocho biomas ni caminos 3D.
+
+## Cambio v0.0.6
+- Todos los nodos GPS (madera, piedra, mineral y alimentos) entregan exactamente **1 unidad** por recolección.
+- Actualización de caché PWA para recibir el cambio.
